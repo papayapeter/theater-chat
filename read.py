@@ -41,7 +41,13 @@ def main() -> None:
         # change_detected.set()
 
     now = datetime.now()
-    col_query = db.collection('chat').where('timestamp', '>', now)
+
+    # show older messages?
+    print(f'show old messages? (y/n)')
+    if input('> ').lower() == 'y':
+        col_query = db.collection('chat')
+    else:
+        col_query = db.collection('chat').where('timestamp', '>', now)
 
     # watch the collection query
     query_watch = col_query.on_snapshot(on_snapshot)
