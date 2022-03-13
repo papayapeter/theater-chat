@@ -1,6 +1,4 @@
 import time
-import sys
-# import threading
 from datetime import datetime
 from termcolor import colored
 import firebase_admin
@@ -16,12 +14,6 @@ def main() -> None:
     firebase_admin.initialize_app(cred)
 
     db = firestore.client()
-
-    # # create an event for notifying main thread
-    # change_detected = threading.Event()
-
-    # clear terminal
-    clear()
 
     # get all roles
     roles = db.collection('roles').get()
@@ -48,6 +40,9 @@ def main() -> None:
         col_query = db.collection('chat')
     else:
         col_query = db.collection('chat').where('timestamp', '>', now)
+
+    # clear terminal
+    clear()
 
     # watch the collection query
     query_watch = col_query.on_snapshot(on_snapshot)
