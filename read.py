@@ -27,8 +27,9 @@ def main() -> None:
             if change.type.name == 'ADDED':
                 data = change.document.to_dict()
                 print(
-                    colored(f'{data["roleID"]}> {data["message"]}',
-                            roles_dict[data['roleID']]['color']))
+                    colored(
+                        f'{data["roleID"]} ({data["timestamp"].strftime("%H:%M:%S")})> {data["message"]}',
+                        roles_dict[data['roleID']]['color']))
 
         # change_detected.set()
 
@@ -39,7 +40,8 @@ def main() -> None:
     if input('> ').lower() == 'y':
         col_query = db.collection('chat')
     else:
-        col_query = db.collection('chat').where('timestamp', '>', now)
+        col_query = db.collection('chat').where('timestamp', '>',
+                                                now).order_by('timestamp')
 
     # clear terminal
     clear()
