@@ -1,59 +1,90 @@
-import time
-from datetime import datetime
-from termcolor import colored
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import db
+from pyparsing import col
+from termcolor import colored
+import time
+from datetime import datetime
 
-from helpers import clear
+from modules.roles import Roles
+from modules.chat import Chat
+from modules.helpers import clear
 
 
 def main() -> None:
-    # initialize database
+    # fetch the service account key json file contents
     cred = credentials.Certificate('service-account-key.json')
-    firebase_admin.initialize_app(cred)
 
-    db = firestore.client()
+    # initialize the app with a service account, granting admin privileges
+    firebase_admin.initialize_app(
+        cred, {
+            'databaseURL':
+            'https://ghosts-of-data-past-default-rtdb.europe-west1.firebasedatabase.app/'
+        })
+
+    ref = db.reference('/')
+
+    roles = Roles(ref.child('roles'))
+    chat = Chat(ref.child('messages'), roles)
 
     # get all roles
-    roles = db.collection('roles').get()
-    roles_dict = {}
-    for role in roles:
-        roles_dict[role.id] = role.to_dict()
-
-    # create a callback on_snapshot function to capture changes
-    def on_snapshot(col_snapshot, changes, read_time):
-        for change in changes:
-            if change.type.name == 'ADDED':
-                data = change.document.to_dict()
-                print(
-                    colored(
-                        f'{data["roleID"]} ({data["timestamp"].strftime("%H:%M:%S")})> {data["message"]}',
-                        roles_dict[data['roleID']]['color']))
-
-        # change_detected.set()
-
-    now = datetime.now()
+    roles_list = roles.get()
 
     # show older messages?
-    print(f'show old messages? (y/n)')
+    print('show old messages? (y/n)')
     if input('> ').lower() == 'y':
-        col_query = db.collection('chat')
+        show_from = 0
     else:
-        col_query = db.collection('chat').where('timestamp', '>',
-                                                now).order_by('timestamp')
+        show_from = int(
+            datetime.now().timestamp() * 1000
+        )  # get time in milliseconds dince unix epoch (server time format)
+
+    # show timestamp?
+    print('show timestamp? (y/n)')
+    if input('> ').lower() == 'y':
+        show_timestamp = True
+    else:
+        show_timestamp = False
 
     # clear terminal
     clear()
 
+    # create a callback listener function to capture changes
+    def listener(event):
+        # workaround because data sometimes is a dict and other times a dict of dicts
+        if 'roleID' in event.data:
+            data = {'id': event.data}
+        else:
+            data = event.data
+
+        for id in data:
+            timestamp = datetime.fromtimestamp(data[id]["timestamp"] / 1000)
+            date = timestamp.date()
+
+            if date != listener.previous_date:
+                print(
+                    colored(date.strftime('%d %B %Y'), 'white',
+                            attrs=['bold']))
+                listener.previous_date = date
+
+            if data[id]["timestamp"] > show_from:
+                role = next(role for role in roles_list
+                            if role[0] == data[id]['roleID'])
+                print(
+                    colored(
+                        f'{role[1]} {timestamp.strftime("%H:%M:%S") if show_timestamp else ""}>',
+                        'white'), colored(data[id]["text"], role[2]))
+
+    listener.previous_date = None
+
     # watch the collection query
-    query_watch = col_query.on_snapshot(on_snapshot)
+    chat.listen(listener)
 
     try:
         while True:
-            time.sleep(1)
+            time.sleep(0.1)
     except KeyboardInterrupt:
-        return
+        raise SystemExit
 
 
 if __name__ == '__main__':
