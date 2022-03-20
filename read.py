@@ -51,29 +51,28 @@ def main() -> None:
 
     # create a callback listener function to capture changes
     def listener(event):
-        # workaround because data sometimes is a dict and other times a dict of dicts
-        if 'roleID' in event.data:
-            data = {'id': event.data}
-        else:
-            data = event.data
+        if event.data is not None:
+            # workaround because data sometimes is a dict and other times a dict of dicts
+            if 'roleID' in event.data:
+                data = {'id': event.data}
+            else:
+                data = event.data
 
-        for id in data:
-            timestamp = datetime.fromtimestamp(data[id]["timestamp"] / 1000)
-            date = timestamp.date()
+            for id in data:
+                timestamp = datetime.fromtimestamp(data[id]["timestamp"] /
+                                                   1000)
+                date = timestamp.date()
 
-            if date != listener.previous_date:
-                print(
-                    colored(date.strftime('%d %B %Y'), 'white',
-                            attrs=['bold']))
-                listener.previous_date = date
+                if date != listener.previous_date:
+                    print(colored(date.strftime('%d %B %Y'), attrs=['bold']))
+                    listener.previous_date = date
 
-            if data[id]["timestamp"] > show_from:
-                role = next(role for role in roles_list
-                            if role[0] == data[id]['roleID'])
-                print(
-                    colored(
+                if data[id]["timestamp"] > show_from:
+                    role = next(role for role in roles_list
+                                if role[0] == data[id]['roleID'])
+                    print(
                         f'{role[1]} {timestamp.strftime("%H:%M:%S") if show_timestamp else ""}>',
-                        'white'), colored(data[id]["text"], role[2]))
+                        colored(data[id]["text"], role[2]))
 
     listener.previous_date = None
 
