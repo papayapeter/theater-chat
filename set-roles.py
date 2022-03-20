@@ -1,14 +1,22 @@
 import firebase_admin
 from firebase_admin import credentials
-from firebase_admin import firestore
+from firebase_admin import db
+
+from modules.roles import Roles
 
 
 def main() -> None:
-    # initialize database
+    # fetch the service account key json file contents
     cred = credentials.Certificate('service-account-key.json')
-    firebase_admin.initialize_app(cred)
 
-    db = firestore.client()
+    # initialize the app with a service account, granting admin privileges
+    firebase_admin.initialize_app(
+        cred, {
+            'databaseURL':
+            'https://ghosts-of-data-past-default-rtdb.europe-west1.firebasedatabase.app/'
+        })
+
+    roles = Roles(db.reference('/roles'))
 
     # main, keyboard interruptable loop
     try:
@@ -33,10 +41,7 @@ def main() -> None:
                 # confirmation
                 print(f'add {name} with the color {color}? (y/n)')
                 if input('> ').lower() == 'y':
-                    db.collection('roles').document(name).set({
-                        'name': name,
-                        'color': color
-                    })
+                    roles.add(name, color)
 
             # edit a role
             elif reply == 'e':
@@ -44,31 +49,20 @@ def main() -> None:
                 print('which role would you like to edit?')
 
                 # list all roles
-                roles = db.collection('roles').get()
-                for index, role in enumerate(roles):
-                    print(f'{index}: {role.to_dict()["name"]}')
+                roles_list = roles.get()
+                for index, role in enumerate(roles_list):
+                    print(f'{index}: {role[1]}')
 
                 # change
                 index = int(input('> '))
-                if index < len(roles):
-                    # get an list original data
-                    data = roles[index].to_dict()
+                if index < len(roles_list):
                     name = input(
-                        f'name: original: {data["name"]} | new (keep blank to keep original)> '
+                        f'name: original: {roles_list[index][1]} | new (keep blank to keep original)> '
                     ).lower()
-                    if not name:
-                        name = data['name']
                     color = input(
-                        f'color: original: {data["color"]} | new (keep blank to keep original)> '
+                        f'color: original: {roles_list[index][2]} | new (keep blank to keep original)> '
                     )
-                    if not color:
-                        color = data['color']
-                    db.collection('roles').document(roles[index].id).set({
-                        'name':
-                        name,
-                        'color':
-                        color
-                    })
+                    roles.edit(roles_list[index][0], name, color)
                 else:
                     print('out of range!')
 
@@ -78,14 +72,14 @@ def main() -> None:
                 print('which role would you like to remove?')
 
                 # list all roles
-                roles = db.collection('roles').get()
-                for index, role in enumerate(roles):
-                    print(f'{index}: {role.to_dict()["name"]}')
+                roles_list = roles.get()
+                for index, role in enumerate(roles_list):
+                    print(f'{index}: {role[1]}')
 
                 # delete
                 index = int(input('> '))
-                if index < len(roles):
-                    db.collection('roles').document(roles[index].id).delete()
+                if index < len(roles_list):
+                    roles.delete(roles_list[index][0])
                 else:
                     print('out of range!')
 
@@ -96,7 +90,7 @@ def main() -> None:
             else:
                 print('wrong input!')
     except KeyboardInterrupt:
-        return
+        raise SystemExit
 
 
 if __name__ == '__main__':
