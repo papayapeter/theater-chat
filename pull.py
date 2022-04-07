@@ -1,3 +1,5 @@
+"""for exporting all chat data from the firebase realtimedatabase to json"""
+
 from email import message
 import firebase_admin
 from firebase_admin import credentials
