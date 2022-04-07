@@ -1,7 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
-from pyparsing import col
 from termcolor import colored
 import time
 from datetime import datetime

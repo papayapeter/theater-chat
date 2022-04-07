@@ -133,3 +133,6 @@ dmypy.json
 
 # firebase credentials
 service-account-key.json
+
+# exported chat data
+chat_data.json

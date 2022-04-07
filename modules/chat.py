@@ -1,6 +1,5 @@
-from typing import Tuple, List
+from typing import Any, Dict, List
 from firebase_admin.db import Reference
-from pandas import DataFrame
 from modules.roles import Roles
 
 from datetime import datetime
@@ -33,15 +32,15 @@ class Chat:
     def listen(self, callback) -> None:
         self._reference.listen(callback)
 
-    def get(self) -> DataFrame:
+    def get(self) -> List[Dict[str, Any]]:
         """
         """
         data = self._reference.order_by_child('timestamp').get()
         roles_list = self._roles.get()
 
-        rows = []
+        entries = []
         for id in data:
-            rows.append({
+            entries.append({
                 'id':
                 id,
                 'roleID':
@@ -49,10 +48,13 @@ class Chat:
                 'roleName':
                 next(role for role in roles_list
                      if role[0] == data[id]['roleID'])[1],
+                'roleColor':
+                next(role for role in roles_list
+                     if role[0] == data[id]['roleID'])[2],
                 'message':
                 data[id]['text'],
                 'timestamp':
                 datetime.fromtimestamp(data[id]["timestamp"] / 1000)
             })
 
-        return DataFrame(rows)
+        return entries
