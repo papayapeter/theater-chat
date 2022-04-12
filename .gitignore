@@ -138,6 +138,7 @@ service-account-key.json
 chat_data*.json
 chat*.txt
 ghosts-of-data-past-default-rtdb-export*.json
+for_editing*.txt
 
 # test scripts
 test*
