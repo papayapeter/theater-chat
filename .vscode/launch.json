@@ -11,6 +11,28 @@
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true
+        },
+        {
+            "name": "parse for editing",
+            "type": "python",
+            "request": "launch",
+            "program": "parse.py",
+            "args": [
+                "chat_data.json",
+                "for_editing.txt"
+            ],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "parse from editing",
+            "type": "python",
+            "request": "launch",
+            "program": "parse.py",
+            "args": [
+                "for_editing.txt",
+                "chat_data_edited.json"
+            ],
+            "console": "integratedTerminal"
         }
     ]
 }

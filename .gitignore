@@ -135,4 +135,9 @@ dmypy.json
 service-account-key.json
 
 # exported chat data
-chat_data.json
+chat_data*.json
+chat*.txt
+ghosts-of-data-past-default-rtdb-export*.json
+
+# test scripts
+test*

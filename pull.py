@@ -36,10 +36,7 @@ def main() -> None:
     with open('chat_data.json', encoding='utf8') as file:
         chat_data = json.load(file)
 
-    for entry in chat_data:
-        print(
-            f'{entry["roleName"]} {datetime.strptime(entry["timestamp"], "%Y-%m-%d %H:%M:%S.%f").strftime("%H:%M:%S")}>',
-            colored(entry["message"], entry['roleColor']))
+    print(f'message count: {len(chat_data)}')
 
 
 if __name__ == '__main__':

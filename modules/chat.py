@@ -54,7 +54,7 @@ class Chat:
                 'message':
                 data[id]['text'],
                 'timestamp':
-                datetime.fromtimestamp(data[id]["timestamp"] / 1000)
+                data[id]["timestamp"]
             })
 
         return entries
