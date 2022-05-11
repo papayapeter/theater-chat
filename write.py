@@ -3,6 +3,7 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db
+import readline
 
 from modules.roles import Roles
 from modules.chat import Chat
