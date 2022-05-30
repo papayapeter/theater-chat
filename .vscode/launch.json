@@ -19,7 +19,7 @@
             "program": "parse.py",
             "args": [
                 "chat_data.json",
-                "for_editing.txt"
+                "for_editing0.txt"
             ],
             "console": "integratedTerminal"
         },

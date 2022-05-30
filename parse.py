@@ -17,6 +17,7 @@ def parse(input: str, output: str) -> None:
         os.makedirs(outdir, exist_ok=True)
 
     # check if input is json or txt
+    # json: parse for editing
     if os.path.splitext(input)[1] == '.json':
         # check if output is of right type
         if os.path.splitext(output)[1] != '.txt':
@@ -35,6 +36,7 @@ def parse(input: str, output: str) -> None:
         with open(output, 'w') as file:
             file.writelines(lines)
 
+    # txt: parse to json
     elif os.path.splitext(input)[1] == '.txt':
         # check if output is of right type
         if os.path.splitext(output)[1] != '.json':
@@ -46,9 +48,9 @@ def parse(input: str, output: str) -> None:
 
         json_object = [{
             'roleName': line.split(' ', 1)[0],
-            'timestamp': line.split('> ', 1)[0].split(' ', 1)[1],
+            'id': index,
             'message': line.split('> ', 1)[1].strip('\n')
-        } for line in lines]
+        } for index, line in enumerate(lines)]
 
         # write json
         with open(output, 'w') as file:
