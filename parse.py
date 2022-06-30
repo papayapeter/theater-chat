@@ -28,7 +28,7 @@ def parse(input: str, output: str) -> None:
             json_object = json.load(file)
 
         lines = [
-            f'{element["roleName"]} {element["timestamp"]}> {element["message"]}\n'
+            f'{element["roleName"]}> {element["message"]}\n'
             for element in json_object
         ]
 
